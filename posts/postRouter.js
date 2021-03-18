@@ -1,28 +1,42 @@
-const express = require('express');
+const express = require('express')
+const router = express.Router()
 
-const router = express.Router();
+const Posts = require('./postDb')
+
+const validatePostId = require('./../middleware/validatePostId')
+const validatePost = require('./../middleware/validatePost')
+
 
 router.get('/', (req, res) => {
-  // do your magic!
-  
+  Posts.get()
+    .then(posts => {
+      res.status(200).json(posts)
+    })
 });
 
-router.get('/:id', (req, res) => {
-  // do your magic!
+router.get('/:id', validatePostId, (req, res) => {
+  Posts.getById(req.params.id)
+  .then(posts => {
+    res.status(200).json(posts)
+  })
 });
 
-router.delete('/:id', (req, res) => {
-  // do your magic!
+router.delete('/:id', validatePostId, (req, res) => {
+  Posts.remove(req.params.id)
+  .then(res => {
+    res.status(200).json({message: 'post has been removed'})
+  })
+  .catch(err => {
+    res.status(500).json({message:"There was an error removing the post", error: err})
+  })
 });
 
-router.put('/:id', (req, res) => {
-  // do your magic!
+
+router.put('/:id', validatePostId, validatePost, (req, res) => {
+  Posts.update(req.params.id, req.body)
+    .then(resp => {
+      res.status(200).json({message:`${resp} Post(s) Updated`})
+    })
 });
-
-// custom middleware
-
-function validatePostId(req, res, next) {
-  // do your magic!
-}
 
 module.exports = router;

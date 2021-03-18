@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 const Users = require('./userDb')
+const Posts = require('./../posts/postDb')
 
 const validateUser = require('./../middleware/validateUser')
 const validateUserId = require('./../middleware/validateUserId')
@@ -16,8 +17,19 @@ router.post('/', validateUser, (req, res) => {
     })
 });
 
-router.post('/:id/posts', validateUserId, validatePost, (req, res, next) => {
-  next()
+router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
+  const post = {
+    user_id: req.params.id,
+    text: req.body.text
+  }
+  Posts.insert(post)
+    .then(resp => {
+      console.log('resp: ', resp)
+      res.status(200).json(resp)
+    })
+    .catch(err => {
+      res.status(500).json({message:"Error adding post to the database.", error: err})
+    })
 });
 
 router.get('/', (req, res) => {
@@ -46,6 +58,9 @@ router.delete('/:id', validateUserId, (req, res) => {
   Users.remove(req.params.id)
   .then(() => {
     res.status(200).json({message: 'user has been removed'})
+  })
+  .catch(err => {
+    res.status(500).json({message:"There was an error removing the User", error: err})
   })
 });
 
