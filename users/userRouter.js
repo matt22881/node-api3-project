@@ -2,46 +2,58 @@ const express = require('express');
 
 const router = express.Router();
 
-router.post('/', (req, res) => {
-  // do your magic!
+const Users = require('./userDb')
+
+const validateUser = require('./../middleware/validateUser')
+const validateUserId = require('./../middleware/validateUserId')
+const validatePost = require('./../middleware/validatePost')
+
+
+router.post('/', validateUser, (req, res) => {
+  Users.insert(req.body)
+    .then(user => {
+      res.status(200).json(user)
+    })
 });
 
-router.post('/:id/posts', (req, res) => {
-  // do your magic!
+router.post('/:id/posts', validateUserId, validatePost, (req, res, next) => {
+  next()
 });
 
 router.get('/', (req, res) => {
-  // do your magic!
+  Users.get()
+    .then(users => {
+      res.status(200).json(users)
+    });
+})
+
+
+router.get('/:id', validateUserId, (req, res) => {
+  Users.getById(req.params.id)
+    .then(user => {
+      res.status(200).json(user)
+    })
 });
 
-router.get('/:id', (req, res) => {
-  // do your magic!
+router.get('/:id/posts', validateUserId, (req, res) => {
+  Users.getUserPosts(req.params.id)
+  .then(posts => {
+    res.status(200).json(posts)
+  })
 });
 
-router.get('/:id/posts', (req, res) => {
-  // do your magic!
+router.delete('/:id', validateUserId, (req, res) => {
+  Users.remove(req.params.id)
+  .then(() => {
+    res.status(200).json({message: 'user has been removed'})
+  })
 });
 
-router.delete('/:id', (req, res) => {
-  // do your magic!
+router.put('/:id', validateUserId, validateUser, (req, res, next) => {
+  Users.update(req.params.id, req.body)
+    .then(resp => {
+      res.status(200).json({message:`${resp} User(s) Updated`})
+    })
 });
-
-router.put('/:id', (req, res) => {
-  // do your magic!
-});
-
-//custom middleware
-
-function validateUserId(req, res, next) {
-  // do your magic!
-}
-
-function validateUser(req, res, next) {
-  // do your magic!
-}
-
-function validatePost(req, res, next) {
-  // do your magic!
-}
 
 module.exports = router;
