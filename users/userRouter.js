@@ -64,7 +64,7 @@ router.delete('/:id', validateUserId, (req, res) => {
   })
 });
 
-router.put('/:id', validateUserId, validateUser, (req, res, next) => {
+router.put('/:id', validateUserId, validateUser, (req, res) => {
   Users.update(req.params.id, req.body)
     .then(resp => {
       res.status(200).json({message:`${resp} User(s) Updated`})
